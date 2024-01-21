@@ -1,0 +1,69 @@
+<configuration>
+    <property name="APP_NAME" value="broker-security"/>
+    <contextName>${APP_NAME}</contextName>
+
+    <include resource="io/bhex/base/log/log-common.xml"/>
+
+    <appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/archives/${APP_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${DEFAULT_MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>${DEFAULT_CHARSET}</charset>
+        </encoder>
+    </appender>
+    <appender name="ASYNC_APP" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="APP"/>
+        <queueSize>${DEFAULT_QUEUE_SIZE}</queueSize>
+        <maxFlushTime>${DEFAULT_FLUSH_TIME}</maxFlushTime>
+    </appender>
+
+    <appender name="GRPC_INVOKE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/grpc_invoke.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/grpc_invoke.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>${DEFAULT_CHARSET}</charset>
+        </encoder>
+    </appender>
+    <appender name="ASYNC_GRPC_INVOKE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="GRPC_INVOKE"/>
+        <queueSize>${DEFAULT_QUEUE_SIZE}</queueSize>
+        <maxFlushTime>${DEFAULT_FLUSH_TIME}</maxFlushTime>
+    </appender>
+
+    <appender name="METRICS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_DIR}/metrics.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_DIR}/metrics.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>${DEFAULT_CHARSET}</charset>
+        </encoder>
+    </appender>
+    <appender name="ASYNC_METRICS" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="METRICS"/>
+        <queueSize>${DEFAULT_QUEUE_SIZE}</queueSize>
+        <maxFlushTime>${DEFAULT_FLUSH_TIME}</maxFlushTime>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_APP"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="io.bhex.broker.common.grpc.client.aspect.GrpcLogAspect" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC_GRPC_INVOKE"/>
+    </logger>
+    <logger name="io.bhex.base.metrics" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC_METRICS"/>
+    </logger>
+
+</configuration>

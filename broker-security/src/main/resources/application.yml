@@ -1,0 +1,63 @@
+server:
+  port: 7122
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: ./logs/
+    basedir: ./
+
+spring:
+  application:
+    name: bhex-broker-security
+  datasource:
+    type: io.bhex.base.mysql.BHMysqlDataSource
+    url: jdbc:mysql://broker-security-db:3306/broker_security?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&autoReconnect=true&failOverReadOnly=false&useSSL=false&
+    username: broker-security-write
+    password: xxxxxx
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      maximum-pool-size: 300
+      minimum-idle: 30
+      max-lifetime: 30000
+      connectionInitSql: select 1 from dual
+  redis:
+    lettuce:
+      pool:
+        max-active: 200
+        max-idle: 50
+        max-wait: 4s
+      cluster:
+        refresh:
+          adaptive: true
+          period: 5s
+    timeout: 10s
+    cluster:
+      nodes:
+        - broker-security-redis:6379
+grpc:
+  port: 7022
+  server-worker-count: 300
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  config: classpath:logback.xml
+
+security:
+  proxy: false
+  secret-key: "*&%$io&bhex#broker*%^&"
+  grpc-client:
+    stub-deadline: 5000
+    channel-info:
+      - channel-name: 'commonServer'
+        host: 'common-server'
+        port: 7220
+        use-ssl: false
+      - channel-name: 'brokerServer'
+        host: 'broker-server'
+        port: 7023
+        use-ssl: false
+verify-captcha: true  #当不校验时，验证码实际不发送且无发送纪录，且默认123456有效
+global-notify-type: 3  #全局强制通知类型 1：all, 2：仅手机, 3：仅邮箱
